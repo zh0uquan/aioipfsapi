@@ -26,4 +26,8 @@ setup(
     package_dir={'': 'aioipfsapi'},
     license='MIT',
     keywords=['', 'ipfs', 'asyncio'],
+    install_requires=[
+        'aiohttp>=2.3.1',
+        'ipfsapi==0.4.2'
+    ]
 )
