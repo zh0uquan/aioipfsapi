@@ -7,6 +7,7 @@ This module wraps the synchrous ipfs api to asynchrous api.
 import asyncio
 import aiohttp
 import logging
+import asyncio_extras
 
 from aiohttp import client_exceptions
 from ipfsapi import (
@@ -21,9 +22,10 @@ logger = logging.getLogger(__name__)
 
 
 async def connect(host=DEFAULT_HOST, port=DEFAULT_PORT, base=DEFAULT_BASE,
-                  loop=None, chunk_size=default_chunk_size, **defaults):
+                        loop=None, chunk_size=default_chunk_size, session=None,
+                        **defaults):
     # Create client instance
-    client = AioClient(host, port, base, chunk_size, loop, **defaults)
+    client = AioClient(host, port, base, chunk_size, loop, session, **defaults)
 
     # Query version number from daemon and validate it
     resp = await client.version()
@@ -39,18 +41,28 @@ class AioHttpClient(HTTPClient):
 
     """
 
-    def __init__(self, host, port, base, loop, **defaults):
+    def __init__(self, host, port, base, loop, session, **defaults):
         super().__init__(host, port, base, **defaults)
         self._loop = loop
 
-        self._session = self.session()
+        if session:
+            self._session = session
+        else:
+            self._session = None
 
     async def _do_request(self, method, *args, **kwargs):
         try:
+
+            if self._session:
+                resp = await self._sess.request(method, *args, **kwargs)
+                resp.raise_for_status()
+                return await resp.read()
+
             async with aiohttp.ClientSession() as sess:
                 resp = await sess.request(method, *args, **kwargs)
                 resp.raise_for_status()
                 return await resp.read()
+
         except asyncio.CancelledError:
             raise
         except client_exceptions.ClientError as error:
@@ -84,6 +96,12 @@ class AioHttpClient(HTTPClient):
 
             return ret
 
+    @asyncio_extras.async_contextmanager
+    async def session(self):
+        session = aiohttp.ClientSession()
+        yield_(session)
+        session.close()
+
 
 class AioClient(Client):
 
@@ -91,11 +109,27 @@ class AioClient(Client):
 
     def __init__(self, host=DEFAULT_HOST, port=DEFAULT_PORT,
                  base=DEFAULT_BASE, chunk_size=default_chunk_size,
-                 loop=None, **defaults):
+                 loop=None, session=None, **defaults):
         """Connects to the API port of an IPFS node."""
 
         self.chunk_size = chunk_size
 
         self._loop = loop or asyncio.get_event_loop()
 
-        self._client = self._clientfactory(host, port, base, loop, **defaults)
+        self._client = self._clientfactory(host, port, base, loop, session,
+                                           **defaults)
+        self._session = session
+
+    async def __aenter__(self):
+        if self._session:
+            resp = await self.version()
+        else:
+            async with aiohttp.ClientSession() as sess:
+                resp = await self.version()
+
+        assert_version(resp['Version'])
+
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        pass

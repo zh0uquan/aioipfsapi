@@ -28,6 +28,7 @@ setup(
     keywords=['', 'ipfs', 'asyncio'],
     install_requires=[
         'aiohttp>=2.3.1',
-        'ipfsapi==0.4.2'
+        'ipfsapi==0.4.2',
+        'asyncio_extras==1.3.0'
     ]
 )
