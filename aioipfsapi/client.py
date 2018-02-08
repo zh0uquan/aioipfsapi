@@ -48,9 +48,9 @@ class AioHttpClient(HTTPClient):
     async def _do_request(self, method, *args, **kwargs):
         try:
             async with aiohttp.ClientSession() as sess:
-                async with getattr(sess, method)(*args, **kwargs) as resp:
-                    resp.raise_for_status()
-                    return await resp.read()
+                resp = await sess.request(method, *args, **kwargs)
+                resp.raise_for_status()
+                return await resp.read()
         except asyncio.CancelledError:
             raise
         except client_exceptions.ClientError as error:
