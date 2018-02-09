@@ -1,19 +1,38 @@
+"""
+Pytest fixtures and config.
+
+"""
+
+import asyncio
 import pytest
 
-from aioipfsapi import AioClient
+import aioipfsapi
 from .server import IPFSServer
 
-@pytest.fixture
-def ipfs_server():
-    ipfs_server = IPFSServer()
+
+@pytest.fixture()
+def event_loop():
+    loop = asyncio.new_event_loop()
+
+    yield loop
+
+
+@pytest.fixture()
+def ipfs_server(request):
+    ipfs_server = IPFSServer(aioipfsapi.DEFAULT_HOST, aioipfsapi.DEFAULT_PORT)
     ipfs_server.start()
+
+    request.addfinalizer(ipfs_server.stop)
 
     return ipfs_server
 
-@pytest.fixture
-def ipfs_client(ipfs_server):
 
-    client = AioClient(
-        ipfs_server.hostname, ipfs_server.port
+@pytest.fixture()
+def ipfs_client(ipfs_server, event_loop):
+
+    client = aioipfsapi.AioClient(
+        ipfs_server.hostname, ipfs_server.port, loop=event_loop
+
     )
+
     return client

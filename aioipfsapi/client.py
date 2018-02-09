@@ -22,8 +22,8 @@ logger = logging.getLogger(__name__)
 
 
 async def connect(host=DEFAULT_HOST, port=DEFAULT_PORT, base=DEFAULT_BASE,
-                        loop=None, chunk_size=default_chunk_size, session=None,
-                        **defaults):
+                  loop=None, chunk_size=default_chunk_size, session=None,
+                  **defaults):
     # Create client instance
     client = AioClient(host, port, base, chunk_size, loop, session, **defaults)
 
@@ -99,7 +99,7 @@ class AioHttpClient(HTTPClient):
     @asyncio_extras.async_contextmanager
     async def session(self):
         session = aiohttp.ClientSession()
-        yield_(session)
+        asyncio_extras.yield_(session)
         session.close()
 
 

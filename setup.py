@@ -30,5 +30,14 @@ setup(
         'aiohttp>=2.3.1',
         'ipfsapi==0.4.2',
         'asyncio_extras==1.3.0'
-    ]
+    ],
+    extras_require={
+        'testing': [
+            'pytest>=3.0,<3.1',
+            'pytest-asyncio==0.8.0',
+            'flask==0.12.2'
+        ]
+
+    }
+
 )
