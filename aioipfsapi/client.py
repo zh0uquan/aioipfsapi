@@ -9,12 +9,15 @@ import aiohttp
 import logging
 import asyncio_extras
 
+from .multipart import (
+    default_chunk_size, stream_filesystem_node
+)
+
 from aiohttp import client_exceptions
 from ipfsapi import (
     Client, DEFAULT_HOST, DEFAULT_PORT, DEFAULT_BASE, assert_version
 )
 from ipfsapi.http import HTTPClient
-from ipfsapi.multipart import default_chunk_size
 
 __all__ = ['AioClient', 'connect']
 
@@ -133,3 +136,31 @@ class AioClient(Client):
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         pass
+
+
+    async def add(self, files, recursive=False, pattern='**', *args, **kwargs):
+        """
+        Add a file or directory to ipfs
+        :param files: (file) the file path or directory path
+        :param recursive: (bool) add the recursive directory path
+        :param pattern: (str) 
+        :return: 
+        """
+        # aiohttp params don't accept bool type as second arg in tuple value
+        # here we explicitly set bool arg to str arg
+        opts = {
+            "trickle": kwargs.pop("trickle", 'False'),
+            "only-hash": kwargs.pop("only_hash", 'False'),
+            "wrap-with-directory": kwargs.pop("wrap_with_directory", 'False'),
+            "pin": kwargs.pop("pin", 'True')
+        }
+
+        if "chunker" in kwargs:
+            opts["chunker"] = kwargs.pop("chunker")
+
+        kwargs.setdefault("opts", opts)
+
+        files = stream_filesystem_node(files, recursive=recursive)
+
+        return await self._client.request('/add', decoder='json',
+                                          data=files, **kwargs)
