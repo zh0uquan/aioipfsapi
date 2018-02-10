@@ -1,3 +1,8 @@
+"""
+This example shows how to get the local node id and one of ipfs default block
+
+"""
+
 import asyncio
 
 import aioipfsapi
