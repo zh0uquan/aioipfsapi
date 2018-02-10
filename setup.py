@@ -15,12 +15,12 @@ else:
     raise RuntimeError('Cannot find version information')
 
 setup(
-    name='aioipfs-api',
+    name='aioipfsapi',
     version=version,
     description='asyncio ipfs client',
     # long_description=readme.read_text('utf-8'),
     author='Quan Zhou',
-    author_email='hi@cole.io',
+    author_email='zhouquan0x16@gmail.com',
     url='https://github.com/zh0uquan/aioipfs-api',
     packages=find_packages('aioipfs-api'),
     package_dir={'': 'aioipfsapi'},
