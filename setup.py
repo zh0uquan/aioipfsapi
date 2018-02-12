@@ -6,7 +6,7 @@ from setuptools import find_packages, setup
 VERSION_REGEX = r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]'
 
 init = Path('aioipfsapi/__init__.py')
-# readme = Path(__file__).with_name('README.rst')
+readme = Path(__file__).with_name('README.rst')
 version_match = re.search(VERSION_REGEX, init.read_text('utf-8'), re.MULTILINE)
 
 if version_match:
@@ -18,7 +18,7 @@ setup(
     name='aioipfsapi',
     version=version,
     description='asyncio ipfs client',
-    # long_description=readme.read_text('utf-8'),
+    long_description=readme.read_text('utf-8'),
     author='Quan Zhou',
     author_email='zhouquan0x16@gmail.com',
     url='https://github.com/zh0uquan/aioipfs-api',
