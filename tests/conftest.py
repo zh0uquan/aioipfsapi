@@ -7,7 +7,7 @@ import asyncio
 import pytest
 
 import aioipfsapi
-from .server import IPFSServer
+from .server import IPFSServer, app
 
 
 @pytest.fixture()
@@ -19,7 +19,9 @@ def event_loop():
 
 @pytest.fixture()
 def ipfs_server(request):
-    ipfs_server = IPFSServer(aioipfsapi.DEFAULT_HOST, aioipfsapi.DEFAULT_PORT)
+    ipfs_server = IPFSServer(
+        aioipfsapi.DEFAULT_HOST, aioipfsapi.DEFAULT_PORT, app
+    )
     ipfs_server.start()
 
     request.addfinalizer(ipfs_server.stop)

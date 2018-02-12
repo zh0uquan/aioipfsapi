@@ -65,14 +65,15 @@ def peers():
 
 class IPFSServer(object):
 
-    def __init__(self, hostname, port):
+    def __init__(self, hostname, port, app):
         self.hostname = hostname
         self.port = port
+        self.app = app
         self._process = None
 
     def start(self):
         def worker(hostname, port):
-            app.run(hostname, port)
+            self.app.run(hostname, port)
 
         self._process = multiprocessing.Process(
             target=worker,
