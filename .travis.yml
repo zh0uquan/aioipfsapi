@@ -7,4 +7,4 @@ install:
   - pip install -e .
   - pip install -e .[testing]
 script:
-  - pytest --cov=aioipfsapi --cov-report term-missing
+  - pytest
