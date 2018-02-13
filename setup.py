@@ -35,7 +35,7 @@ setup(
         'testing': [
             'pytest>=3.0,<3.1',
             'pytest-asyncio==0.8.0',
-            'flask==0.12.2'
+            'asynctest==0.11.1'
         ]
 
     }

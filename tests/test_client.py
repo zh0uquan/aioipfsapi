@@ -10,16 +10,19 @@ import pytest
 pytestmark = pytest.mark.asyncio(forbid_global_loop=True)
 
 
-def mock_request(dicts):
+def mock_request(obj):
     """
     Return Mock aiohttp Client Response
-    :param dicts: (expected result)
+    :param obj: (expected result)
     :return:
     """
+    if isinstance(obj, dict):
+        ret = json.dumps(obj).encode('utf-8')
+    elif isinstance(obj, str):
+        ret = obj.encode('utf-8')
     mock_return = asynctest.MagicMock()
-    string = json.dumps(dicts)
     mock_return.read = asynctest.CoroutineMock(
-        return_value=string.encode('utf-8')
+        return_value=ret
     )
     return asynctest.CoroutineMock(return_value=mock_return)
 
@@ -496,10 +499,15 @@ async def test_id(ipfs_client):
 #         content = await ipfs_client.resolve()
 #         assert content == {}
 #
-# async def test_shutdown(ipfs_client):
-#     async with ipfs_client:
-#         content = await ipfs_client.shutdown()
-#         assert content == {}
+
+EMPTY = ''
+
+async def test_shutdown(ipfs_client):
+    with asynctest.mock.patch('aiohttp.ClientSession.request',
+                              new=mock_request(EMPTY)):
+        async with ipfs_client:
+            content = await ipfs_client.shutdown()
+            assert content == b''
 #
 # async def test_stats_bitswap(ipfs_client):
 #     async with ipfs_client:
