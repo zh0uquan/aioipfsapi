@@ -30,10 +30,9 @@ def ipfs_server(request):
 
 
 @pytest.fixture()
-def ipfs_client(ipfs_server, event_loop):
+def ipfs_client(event_loop):
 
-    client = aioipfsapi.AioClient(
-        ipfs_server.hostname, ipfs_server.port, loop=event_loop
+    client = aioipfsapi.AioClient(loop=event_loop
 
     )
 

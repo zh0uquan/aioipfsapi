@@ -2,12 +2,27 @@
 test ipfs api interface.
 
 """
+import json
+
+import asynctest
 import pytest
-from .server import (
-    VERSION, ID, PEERS
-)
 
 pytestmark = pytest.mark.asyncio(forbid_global_loop=True)
+
+
+def mock_request(dicts):
+    """
+    Return Mock aiohttp Client Response
+    :param dicts: (expected result)
+    :return:
+    """
+    mock_return = asynctest.MagicMock()
+    string = json.dumps(dicts)
+    mock_return.read = asynctest.CoroutineMock(
+        return_value=string.encode('utf-8')
+    )
+    return asynctest.CoroutineMock(return_value=mock_return)
+
 
 # async def test_add(ipfs_client):
 #     async with ipfs_client:
@@ -233,12 +248,29 @@ pytestmark = pytest.mark.asyncio(forbid_global_loop=True)
 #     async with ipfs_client:
 #         content = await ipfs_client.get()
 #         assert content == {}
-#
+
+ID = {
+  'ID': '12345',
+  'PublicKey': 'pkey',
+  'Addresses': [
+    '/ip4/127.0.0.1/tcp/4001/ipfs/12345',
+    '/ip4/172.17.0.1/tcp/4001/ipfs/12345',
+    '/ip4/172.18.0.1/tcp/4001/ipfs/12345',
+    '/ip4/192.168.126.36/tcp/4001/ipfs/12345',
+    '/ip6/::1/tcp/4001/ipfs/12345',
+    '/ip4/84.138.93.214/tcp/4001/ipfs/12345'
+  ],
+  'AgentVersion': 'go-ipfs/0.4.14-dev/b37f856',
+  'ProtocolVersion': 'ipfs/0.1.0'
+}
+
 async def test_id(ipfs_client):
-    async with ipfs_client:
-        content = await ipfs_client.id()
-        assert content == ID
-#
+    with asynctest.mock.patch('aiohttp.ClientSession.request',
+                              new=mock_request(ID)):
+        async with ipfs_client:
+            content = await ipfs_client.id()
+            assert content == ID
+# #
 # async def test_key_gen(ipfs_client):
 #     async with ipfs_client:
 #         content = await ipfs_client.key_gen()
@@ -514,10 +546,28 @@ async def test_id(ipfs_client):
 #         content = await ipfs_client.swarm_filters_rm()
 #         assert content == {}
 
+PEERS = {
+  'Peers': [{
+    'Addr': '/ip4/104.131.169.41/tcp/4001',
+    'Peer': 'QmVGkGSV25o3AMjcjjnPVb1PqJzrA1PvvhMiV57cMEuExb',
+    'Latency': '',
+    'Muxer': '*sm_yamux.conn',
+    'Streams': None
+  }, {
+    'Addr': '/ip4/99.229.246.68/tcp/36306',
+    'Peer': 'QmfMf95tEQhJGGgsCmuHYtDZtWb5RvyeVRWTQXY6mQH5PD',
+    'Latency': '',
+    'Muxer': '*sm_yamux.conn',
+    'Streams': None
+  }]
+}
+
 async def test_swarm_peers(ipfs_client):
-    async with ipfs_client:
-        content = await ipfs_client.swarm_peers()
-        assert content == PEERS
+    with asynctest.mock.patch('aiohttp.ClientSession.request',
+                              new=mock_request(PEERS)):
+        async with ipfs_client:
+            content = await ipfs_client.swarm_peers()
+            assert content == PEERS
 
 # async def test_tar_add(ipfs_client):
 #     async with ipfs_client:
@@ -534,7 +584,17 @@ async def test_swarm_peers(ipfs_client):
 #         content = await ipfs_client.update()
 #         assert content == {}
 
+VERSION = {
+  'Version': '0.4.14-dev',
+  'Commit': 'b37f856',
+  'Repo': '6',
+  'System': 'amd64/linux',
+  'Golang': 'go1.9.3'
+}
+
 async def test_version(ipfs_client):
-    async with ipfs_client:
-        content = await ipfs_client.version()
-        assert content == VERSION
+    with asynctest.mock.patch('aiohttp.ClientSession.request',
+                              new=mock_request(VERSION)):
+        async with ipfs_client:
+            content = await ipfs_client.version()
+            assert content == VERSION

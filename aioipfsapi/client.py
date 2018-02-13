@@ -124,27 +124,18 @@ class AioClient(Client):
         self._session = session
 
     async def __aenter__(self):
-        if self._session:
-            resp = await self.version()
-        else:
-            async with aiohttp.ClientSession() as sess:
-                resp = await self.version()
-
-        assert_version(resp['Version'])
-
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         pass
-
 
     async def add(self, files, recursive=False, pattern='**', *args, **kwargs):
         """
         Add a file or directory to ipfs
         :param files: (file) the file path or directory path
         :param recursive: (bool) add the recursive directory path
-        :param pattern: (str) 
-        :return: 
+        :param pattern: (str)
+        :return:
         """
         # aiohttp params don't accept bool type as second arg in tuple value
         # here we explicitly set bool arg to str arg
