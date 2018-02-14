@@ -528,11 +528,25 @@ async def test_shutdown(ipfs_client):
 #     async with ipfs_client:
 #         content = await ipfs_client.swarm_addrs_listen()
 #         assert content == {}
-#
-# async def test_swarm_addrs_local(ipfs_client):
-#     async with ipfs_client:
-#         content = await ipfs_client.swarm_addrs_local()
-#         assert content == {}
+
+ADDRS = {
+  'Addrs': {
+    'QmNfrwD6Fq5ffwk3EZw4cTSxBLHJSvDjzWm7GVRf262cfU':
+        ['/ip4/10.0.3.1/tcp/4001', '/ip4/10.15.0.8/tcp/4001',
+         '/ip4/127.0.0.1/tcp/4001', '/ip4/159.65.4.168/tcp/4001',
+         '/ip4/172.17.0.1/tcp/4001', '/ip6/::1/tcp/4001'],
+    'QmPA19wdewX2erMpCbTbGQMdAV6DxXhk1MiYrBMqH15Ysp':
+        ['/ip4/127.0.0.1/tcp/4001', '/ip4/94.16.122.21/tcp/4001',
+         '/ip6/::1/tcp/4001']
+  }
+}
+
+async def test_swarm_addrs(ipfs_client):
+    with asynctest.mock.patch('aiohttp.ClientSession.request',
+                              new=mock_request(ADDRS)):
+        async with ipfs_client:
+            content = await ipfs_client.swarm_addrs()
+            assert content == ADDRS
 #
 # async def test_swarm_connect(ipfs_client):
 #     async with ipfs_client:
@@ -585,11 +599,6 @@ async def test_swarm_peers(ipfs_client):
 # async def test_tar_cat(ipfs_client):
 #     async with ipfs_client:
 #         content = await ipfs_client.tar_cat()
-#         assert content == {}
-#
-# async def test_update(ipfs_client):
-#     async with ipfs_client:
-#         content = await ipfs_client.update()
 #         assert content == {}
 
 VERSION = {
