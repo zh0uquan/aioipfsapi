@@ -547,26 +547,58 @@ async def test_swarm_addrs(ipfs_client):
         async with ipfs_client:
             content = await ipfs_client.swarm_addrs()
             assert content == ADDRS
-#
-# async def test_swarm_connect(ipfs_client):
-#     async with ipfs_client:
-#         content = await ipfs_client.swarm_connect()
-#         assert content == {}
-#
-# async def test_swarm_disconnect(ipfs_client):
-#     async with ipfs_client:
-#         content = await ipfs_client.swarm_disconnect()
-#         assert content == {}
-#
-# async def test_swarm_filters_add(ipfs_client):
-#     async with ipfs_client:
-#         content = await ipfs_client.swarm_filters_add()
-#         assert content == {}
-#
-# async def test_swarm_filters_rm(ipfs_client):
-#     async with ipfs_client:
-#         content = await ipfs_client.swarm_filters_rm()
-#         assert content == {}
+
+OBJ = 'QmaCpDMGvV2BGHeYERUEnRQAwe3N8SzbUtfsmvsqQLuvuJ'
+
+
+REMOTE_ADDR = '/ip4/104.131.131.82/tcp/4001/ipfs/%s' % OBJ
+
+async def test_swarm_connect(ipfs_client):
+    with asynctest.mock.patch('aiohttp.ClientSession.request',
+                              new=mock_request(
+                                  {'Strings':
+                                       ['connect {} success'.format(OBJ)]}
+                              )):
+        async with ipfs_client:
+            content = await ipfs_client.swarm_connect(REMOTE_ADDR)
+            assert content == {
+                'Strings': [
+                    'connect {} success'.format(
+                        OBJ
+                    )]
+            }
+
+
+async def test_swarm_disconnect(ipfs_client):
+    with asynctest.mock.patch('aiohttp.ClientSession.request',
+                              new=mock_request(
+                                  {'Strings':
+                                       ['disconnect {} success'.format(OBJ)]}
+                              )):
+        async with ipfs_client:
+            content = await ipfs_client.swarm_disconnect(REMOTE_ADDR)
+            assert content == {
+                'Strings': [
+                    'disconnect {} success'.format(
+                        OBJ
+                    )]
+            }
+
+ADDR = '/ip4/192.168.0.0/ipcidr/16'
+
+async def test_swarm_filters_add(ipfs_client):
+    with asynctest.mock.patch('aiohttp.ClientSession.request',
+                              new=mock_request({'Strings': [ADDR]})):
+        async with ipfs_client:
+            content = await ipfs_client.swarm_filters_add(ADDR)
+            assert content == {'Strings': ['/ip4/192.168.0.0/ipcidr/16']}
+
+async def test_swarm_filters_rm(ipfs_client):
+    with asynctest.mock.patch('aiohttp.ClientSession.request',
+                              new=mock_request({'Strings': [ADDR]})):
+        async with ipfs_client:
+            content = await ipfs_client.swarm_filters_rm(ADDR)
+            assert content == {'Strings': ['/ip4/192.168.0.0/ipcidr/16']}
 
 PEERS = {
   'Peers': [{
